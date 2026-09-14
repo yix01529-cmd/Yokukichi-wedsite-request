@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request | Yokukichi.and.capybara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#07040d;
+    --bg-1:#170b2e;
+    --bg-2:#2a1150;
+    --purple:#a855f7;
+    --purple-soft:#c084fc;
+    --blue:#38bdf8;
+    --card:#0f0a1a;
+    --card-border:rgba(168,85,247,0.25);
+    --text:#f4f2fb;
+    --muted:#a79fc2;
+    --muted-2:#8a80ab;
+    --green:#4ade80;
+    --red:#f87171;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    background:
+      radial-gradient(ellipse 120% 60% at 50% -10%, var(--bg-2) 0%, transparent 60%),
+      linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-0) 100%);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:'Inter','Noto Sans JP',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  #stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .star{position:absolute;background:#fff;border-radius:50%;opacity:0.6;animation:twinkle 4s ease-in-out infinite, drift 40s linear infinite;}
+  @keyframes twinkle{0%,100%{opacity:0.15;}50%{opacity:0.85;}}
+  @keyframes drift{from{transform:translateY(0);}to{transform:translateY(-30px);}}
+
+  .wrap{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:28px 20px 60px;}
+
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s ease;}
+  .back-link:hover{color:var(--purple-soft);}
+  .back-link svg{width:16px;height:16px;}
+
+  .lang-toggle{display:flex;background:rgba(255,255,255,0.05);border:1px solid var(--card-border);border-radius:999px;padding:3px;gap:2px;}
+  .lang-toggle button{border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:.03em;padding:6px 14px;border-radius:999px;cursor:pointer;transition:all .25s ease;}
+  .lang-toggle button.active{background:linear-gradient(135deg, var(--purple), var(--blue));color:#0a0612;}
+
+  .hero{text-align:center;margin-bottom:48px;}
+  .hero .mark{position:relative;display:inline-flex;align-items:center;justify-content:center;width:84px;height:84px;border-radius:26px;background:linear-gradient(135deg, var(--purple) 0%, var(--blue) 100%);margin-bottom:20px;box-shadow:0 10px 40px -8px rgba(168,85,247,0.55);}
+  .hero .mark span{font-size:36px;}
+  .hero .mark .star-badge{position:absolute;top:-8px;right:-8px;width:22px;height:22px;color:var(--blue);filter:drop-shadow(0 0 6px rgba(56,189,248,.8));}
+  .hero h1{font-family:'Baloo 2',sans-serif;font-size:26px;font-weight:700;margin:0 0 10px;background:linear-gradient(135deg, var(--purple-soft), var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero p.tagline{color:var(--muted);font-size:14.5px;line-height:1.7;margin:0 auto;max-width:440px;}
+
+  section{margin-bottom:48px;}
+  .eyebrow{font-family:'Baloo 2',sans-serif;font-size:13px;font-weight:700;color:var(--purple-soft);margin:0 0 12px;}
+  h2.title{font-family:'Baloo 2',sans-serif;font-size:21px;font-weight:600;margin:0 0 6px;color:var(--text);}
+  p.sub{color:var(--muted-2);font-size:13px;margin:0 0 18px;}
+  p{line-height:1.85;color:var(--muted);font-size:14.5px;margin:0 0 14px;}
+  p:last-child{margin-bottom:0;}
+  strong{color:var(--text);font-weight:600;}
+
+  /* plan cards */
+  .plans{display:flex;flex-direction:column;gap:12px;}
+  .plan{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:20px;
+    padding:18px 20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .plan.special{border-color:rgba(168,85,247,0.55);background:linear-gradient(160deg, rgba(168,85,247,0.14), rgba(56,189,248,0.06));}
+  .plan-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+  .plan-name{font-family:'Baloo 2',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
+  .plan-price{font-size:15px;font-weight:700;color:var(--purple-soft);}
+  .plan-price.na{color:var(--muted-2);font-weight:500;font-size:13px;}
+  .plan-rows{display:flex;flex-direction:column;gap:8px;}
+  .plan-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-top:1px solid rgba(255,255,255,0.05);}
+  .plan-row:first-child{border-top:none;}
+  .plan-row .k{color:var(--muted-2);}
+  .plan-row .v{color:var(--text);font-weight:600;}
+  .yes{color:var(--green);}
+  .no{color:var(--red);}
+  .na-text{color:var(--muted-2);}
+
+  /* detail blocks */
+  .detail{padding-left:16px;border-left:2px solid var(--card-border);margin-bottom:20px;}
+  .detail:last-child{margin-bottom:0;}
+  .detail h3{font-family:'Baloo 2',sans-serif;font-size:15px;margin:0 0 8px;color:var(--purple-soft);font-weight:600;}
+  .detail p{font-size:13.5px;margin-bottom:0;}
+
+  /* payment card */
+  .pay-card{
+    display:flex;align-items:center;gap:14px;
+    background:var(--card);border:1px solid var(--card-border);border-radius:18px;padding:16px 18px;
+  }
+  .pay-icon{width:42px;height:42px;border-radius:12px;background:rgba(168,85,247,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;}
+  .pay-card .t{font-size:14px;font-weight:600;color:var(--text);}
+  .pay-card .s{font-size:12.5px;color:var(--muted-2);margin-top:2px;}
+
+  /* notes accordion-ish grouped list */
+  .note-group{margin-bottom:22px;}
+  .note-group:last-child{margin-bottom:0;}
+  .note-group h3{font-family:'Baloo 2',sans-serif;font-size:14px;color:var(--blue);margin:0 0 10px;font-weight:600;}
+  .note-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .note-list li{
+    font-size:13.5px;color:var(--muted);line-height:1.7;
+    background:rgba(255,255,255,0.02);
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:12px;
+    padding:10px 14px;
+    padding-left:28px;
+    position:relative;
+  }
+  .note-list li::before{
+    content:'';
+    position:absolute;left:12px;top:16px;
+    width:5px;height:5px;border-radius:50%;
+    background:var(--purple-soft);
+  }
+
+  /* perks */
+  .perk-grid{display:flex;flex-direction:column;gap:10px;}
+  .perk{
+    display:flex;gap:12px;align-items:flex-start;
+    background:linear-gradient(160deg, rgba(168,85,247,0.08), rgba(56,189,248,0.04));
+    border:1px solid var(--card-border);border-radius:16px;padding:14px 16px;
+  }
+  .perk-icon{font-size:18px;flex-shrink:0;}
+  .perk .t{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:3px;}
+  .perk .d{font-size:12.5px;color:var(--muted-2);line-height:1.6;}
+
+  /* CTA */
+  .cta-box{text-align:center;padding:40px 24px;border-radius:24px;background:linear-gradient(160deg, rgba(168,85,247,0.16), rgba(56,189,248,0.08));border:1px solid var(--card-border);}
+  .cta-box p.msg{font-family:'Baloo 2',sans-serif;font-size:17px;line-height:1.6;color:var(--text);font-weight:500;margin:0 0 20px;}
+  .cta-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg, var(--purple), var(--blue));
+    color:#0a0612;font-weight:700;font-size:14px;
+    padding:13px 28px;border-radius:999px;text-decoration:none;
+    transition:transform .2s ease, box-shadow .2s ease;
+    box-shadow:0 8px 24px -6px rgba(168,85,247,0.5);
+  }
+  .cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px -6px rgba(168,85,247,0.65);}
+  .cta-btn-row{display:flex;flex-direction:column;gap:12px;align-items:center;}
+  .cta-btn.secondary{
+    background:transparent;
+    color:var(--text);
+    box-shadow:none;
+    border:1px solid var(--card-border);
+  }
+  .cta-btn.secondary:hover{
+    transform:translateY(-2px);
+    border-color:rgba(168,85,247,0.6);
+    box-shadow:0 8px 20px -8px rgba(168,85,247,0.4);
+  }
+
+  footer{text-align:center;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);color:var(--muted-2);font-size:12px;line-height:1.8;}
+
+  [data-lang]{display:none;}
+  body.lang-ja [data-lang="ja"]{display:block;}
+  body.lang-ja span[data-lang="ja"]{display:inline;}
+  body.lang-en [data-lang="en"]{display:block;}
+  body.lang-en span[data-lang="en"]{display:inline;}
+</style>
+</head>
+<body class="lang-ja">
+
+<div id="stars"></div>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      <span data-lang="ja">もどる</span><span data-lang="en">Back</span>
+    </a>
+    <div class="lang-toggle">
+      <button id="btn-ja" onclick="setLang('ja')">JP</button>
+      <button id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="mark">
+      <span>🎬</span>
+      <svg class="star-badge" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>
+    </div>
+    <h1 data-lang="ja">動画依頼について</h1>
+    <h1 data-lang="en">Commission Info</h1>
+    <p class="tagline" data-lang="ja">Alight MotionとCapCut、それぞれの強みを組み合わせて、クオリティの高い編集動画をお届けします。</p>
+    <p class="tagline" data-lang="en">By combining the strengths of Alight Motion and CapCut, high-quality edited videos are created for every request.</p>
+  </div>
+
+  <!-- Dandy's World plans -->
+  <section>
+    <p class="eyebrow" data-lang="ja">プラン比較</p>
+    <p class="eyebrow" data-lang="en">Plan comparison</p>
+    <h2 class="title" data-lang="ja">Dandy's World 編集</h2>
+    <h2 class="title" data-lang="en">Dandy's World edit</h2>
+    <p class="sub" data-lang="ja">お支払いはPayPalのみ対応しています。</p>
+    <p class="sub" data-lang="en">PayPal is the only accepted payment method.</p>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-head"><span class="plan-name">FREE EDIT</span><span class="plan-price">$0</span></div>
+        <div class="plan-rows">
+          <div class="plan-row"><span class="k" data-lang="ja">画質</span><span class="k" data-lang="en">Quality</span><span class="v">720P</span></div>
+          <div class="plan-row"><span class="k" data-lang="ja">ロゴなし</span><span class="k" data-lang="en">No watermark</span><span class="v no">✕</span></div>
+          <div class="plan-row"><span class="k" data-lang="ja">効果音</span><span class="k" data-lang="en">Sound effects</span><span class="v no">✕</span></div>
+        </div>
+      </div>
+      <div class="plan">
+        <div class="plan-head"><span class="plan-name">NORMAL EDIT</span><span class="plan-price">$3〜5</span></div>
+        <div class="plan-rows">
+          <div class="plan-row"><span class="k" data-lang="ja">画質</span><span class="k" data-lang="en">Quality</span><span class="v">1080P (FHD)</span></div>
+          <div class="plan-row"><span class="k" data-lang="ja">ロゴなし</span><span class="k" data-lang="en">No watermark</span><span class="v yes">〇</span></div>
+          <div class="plan-row"><span class="k" data-lang="ja">効果音</span><span class="k" data-lang="en">Sound effects</span><span class="v no">✕</span></div>
+        </div>
+      </div>
+      <div class="plan special">
+        <div class="plan-head"><span class="plan-name">SPECIAL EDIT</span><span class="plan-price">$10〜20</span></div>
+        <div class="plan-rows">
+          <div class="plan-row"><span class="k" data-lang="ja">画質</span><span class="k" data-lang="en">Quality</span><span class="v">4K (UHD)</span></div>
+          <div class="plan-row"><span class="k" data-lang="ja">ロゴなし</span><span class="k" data-lang="en">No watermark</span><span class="v yes">〇</span></div>
+          <div class="plan-row"><span class="k" data-lang="ja">効果音</span><span class="k" data-lang="en">Sound effects</span><span class="v yes">〇</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Animal Hospital plans -->
+  <section>
+    <h2 class="title" data-lang="ja">Animal Hospital 編集</h2>
+    <h2 class="title" data-lang="en">Animal Hospital edit</h2>
+    <p class="sub" data-lang="ja">Special Editのみ対応しています。</p>
+    <p class="sub" data-lang="en">Only available as a Special Edit.</p>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-head"><span class="plan-name">FREE EDIT</span><span class="plan-price na">N/A</span></div>
+        <p class="na-text" style="font-size:13px;margin:0;" data-lang="ja">対応していません</p>
+        <p class="na-text" style="font-size:13px;margin:0;" data-lang="en">Not available</p>
+      </div>
+      <div class="plan">
+        <div class="plan-head"><span class="plan-name">NORMAL EDIT</span><span class="plan-price na">N/A</span></div>
+        <p class="na-text" style="font-size:13px;margin:0;" data-lang="ja">対応していません</p>
+        <p class="na-text" style="font-size:13px;margin:0;" data-lang="en">Not available</p>
+      </div>
+      <div class="plan special">
+        <div class="plan-head"><span class="plan-name">SPECIAL EDIT</span><span class="plan-price">$15〜25</span></div>
+        <div class="plan-rows">
+          <div class="plan-row"><span class="k" data-lang="ja">画質</span><span class="k" data-lang="en">Quality</span><span class="v">4K (UHD)</span></div>
+          <div class="plan-row"><span class="k" data-lang="ja">ロゴなし</span><span class="k" data-lang="en">No watermark</span><span class="v yes">〇</span></div>
+          <div class="plan-row"><span class="k" data-lang="ja">効果音</span><span class="k" data-lang="en">Sound effects</span><span class="v yes">〇</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Plan details -->
+  <section>
+    <p class="eyebrow" data-lang="ja">プラン詳細</p>
+    <p class="eyebrow" data-lang="en">Plan details</p>
+    <h2 class="title" data-lang="ja">それぞれのプランについて</h2>
+    <h2 class="title" data-lang="en">About each plan</h2>
+    <p class="sub">&nbsp;</p>
+
+    <div class="detail">
+      <h3>FREE EDIT</h3>
+      <p data-lang="ja">予算が限られている方でも気軽に依頼できるプラン。手間は最小限のため画質は控えめで、Alight Motionの透かしが入る。Dandy's Worldのみ対応、Animal Hospitalには非対応。</p>
+      <p data-lang="en">Free edits are available for anyone, even on a budget. They require little effort (results may vary), the quality is lower, and the Alight Motion watermark will be visible. Dandy's World only — Animal Hospital is not supported.</p>
+    </div>
+    <div class="detail">
+      <h3>NORMAL EDIT</h3>
+      <p data-lang="ja">お手頃な価格でFree Editより高品質に。仕上がりは依頼内容によって差があり、感じ方には個人差がある点はご了承を。1080p(FHD)・60FPSで滑らかな映像を実現し、Alight Motionの透かしもなし。Dandy's Worldのみ対応。</p>
+      <p data-lang="en">Reasonably priced while offering higher quality than the Free Edit — though final quality can vary by request, and opinions may differ. Delivered in 1080p (FHD) at 60 FPS for clear, smooth video, with no Alight Motion watermark. Dandy's World only.</p>
+    </div>
+    <div class="detail">
+      <h3>SPECIAL EDIT</h3>
+      <p data-lang="ja">ほとんどの依頼に対応可能(一部対応できない場合あり)。最大の魅力は、15秒以内の動画であればAI機能を追加料金なしで利用できること(15秒を超える場合は追加料金)。4K(UHD)・60FPS、透かしなしで、より高精細な仕上がりに。Dandy's World・Animal Hospitalどちらも対応。</p>
+      <p data-lang="en">Supports most types of edits, though some requests may not be accommodated. The biggest advantage: no extra fee for AI-assisted requests under 15 seconds (additional charges apply beyond that). Delivered in 4K (UHD) at 60 FPS with no watermark, for a sharper, more detailed result. Supports both Dandy's World and Animal Hospital.</p>
+    </div>
+  </section>
+
+  <!-- Payment -->
+  <section>
+    <p class="eyebrow" data-lang="ja">お支払い</p>
+    <p class="eyebrow" data-lang="en">Payment</p>
+    <div class="pay-card">
+      <div class="pay-icon">💳</div>
+      <div>
+        <div class="t" data-lang="ja">PayPalのみ対応</div>
+        <div class="t" data-lang="en">PayPal only</div>
+        <div class="s" data-lang="ja">送金手数料はYokukichi側が負担するため、依頼者への追加請求はありません。</div>
+        <div class="s" data-lang="en">Transaction fees are covered on this end — you won't be charged anything extra.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Notes -->
+  <section>
+    <p class="eyebrow" data-lang="ja">ご注意事項</p>
+    <p class="eyebrow" data-lang="en">Notes</p>
+    <h2 class="title" data-lang="ja">依頼前にご確認ください</h2>
+    <h2 class="title" data-lang="en">Please read before requesting</h2>
+    <p class="sub">&nbsp;</p>
+
+    <div class="note-group">
+      <h3 data-lang="ja">制作・納品について</h3>
+      <h3 data-lang="en">Production & delivery</h3>
+      <ul class="note-list">
+        <li data-lang="ja">ご自身で作成していない楽曲を使った依頼の場合、著作権保護のため音声なしでの納品となります。</li>
+        <li data-lang="en">If you request a video using a song you did not create, it will be delivered without audio, to protect copyright.</li>
+
+        <li data-lang="ja">納品予定日より遅れる場合があります。あらかじめご了承ください。</li>
+        <li data-lang="en">The video may be completed later than the estimated date.</li>
+
+        <li data-lang="ja">不正防止のため、お支払い完了前は制作を開始しません。</li>
+        <li data-lang="en">Production will not begin until payment has been completed, to prevent fraud.</li>
+
+        <li data-lang="ja">完成した動画は基本的にHEVC形式で納品します。MP4形式をご希望の場合はお申し付けください(追加料金なし)。</li>
+        <li data-lang="en">Videos are normally delivered in HEVC format. Let me know if you'd like MP4 instead — no extra fee.</li>
+
+        <li data-lang="ja">納期の目安は概ね2週間以内です。やむを得ない事情で遅れる場合はご連絡します。</li>
+        <li data-lang="en">Estimated completion time is generally within two weeks. If delayed for unforeseen reasons, you'll be notified.</li>
+
+        <li data-lang="ja">制作は、お支払い・必要な素材・詳細情報がすべて揃ってから概ね2週間以内に行います。</li>
+        <li data-lang="en">Production is scheduled and completed within about two weeks after payment, materials, and all required details are received.</li>
+      </ul>
+    </div>
+
+    <div class="note-group">
+      <h3 data-lang="ja">対応できないご依頼</h3>
+      <h3 data-lang="en">What's not accepted</h3>
+      <ul class="note-list">
+        <li data-lang="ja">アニメーション動画のご依頼はお受けできません。</li>
+        <li data-lang="en">Requests for animated videos are not accepted.</li>
+
+        <li data-lang="ja">商用・ビジネス関連のご依頼は、アプリの案件のみお受けしています。</li>
+        <li data-lang="en">Commercial or business-related commissions are accepted only for app-related projects.</li>
+
+        <li data-lang="ja">アプリ案件でも、アダルト系のご依頼はお断りしています。</li>
+        <li data-lang="en">Even for app projects, requests involving adult content are not accepted.</li>
+
+        <li data-lang="ja">編集用に画像・動画を送っていただく場合、アダルト系・誹謗中傷系など不適切な内容は送らないようお願いします。</li>
+        <li data-lang="en">You may send Dandy's World or Animal Hospital images/videos for the edit, but please avoid adult content, hate-related content, or anything else inappropriate.</li>
+      </ul>
+    </div>
+
+    <div class="note-group">
+      <h3 data-lang="ja">修正・変更・キャンセル</h3>
+      <h3 data-lang="en">Revisions, changes & cancellations</h3>
+      <ul class="note-list">
+        <li data-lang="ja">無料修正は1回まで。それ以降の修正は追加料金がかかります。</li>
+        <li data-lang="en">One free revision is included. Additional revisions require an extra fee.</li>
+
+        <li data-lang="ja">制作開始後の大幅な変更には追加料金が発生する場合があります。大きな変更をご希望の場合は事前にご相談ください。</li>
+        <li data-lang="en">Major changes requested after production has started may incur an additional fee — please get in touch in advance.</li>
+
+        <li data-lang="ja">お支払い後のキャンセル・返金も可能です。ご希望の場合はできるだけ早めにご連絡ください。</li>
+        <li data-lang="en">Cancellations and refunds are possible after payment. Please contact as soon as possible if you wish to cancel.</li>
+
+        <li data-lang="ja">Special Editの返金は購入から1週間以内のみ対応可能です。1週間を過ぎると返金はお受けできません。</li>
+        <li data-lang="en">For Special Edits, refunds are available within one week of purchase. After that, refunds are no longer accepted.</li>
+      </ul>
+    </div>
+
+    <div class="note-group">
+      <h3 data-lang="ja">AI機能について</h3>
+      <h3 data-lang="en">About the AI feature</h3>
+      <ul class="note-list">
+        <li data-lang="ja">AI機能はSpecial Editのみ利用可能です。参考動画をもとに、キャラクターをダンスさせたり動かしたりできます。</li>
+        <li data-lang="en">AI features are available only with the Special Edit. AI can make characters dance or move based on a reference video.</li>
+
+        <li data-lang="ja">キャラクターの一部が正確に再現されない場合があります。AIで動画をゼロから生成することはできず、期待通りの結果にならないこともある点をご了承ください。</li>
+        <li data-lang="en">Some parts of the character may not be accurately depicted. AI cannot generate an entire video from scratch, and results may not meet everyone's expectations.</li>
+
+        <li data-lang="ja">動画の延長は最大15〜30秒まで可能です。内容によって追加料金が変わります。</li>
+        <li data-lang="en">Videos can be extended up to a maximum of 15–30 seconds. Additional fees vary depending on the content of the request.</li>
+
+        <li data-lang="ja">正確な料金は制作開始前にお伝えします。</li>
+        <li data-lang="en">The exact price will be provided before production begins.</li>
+      </ul>
+    </div>
+
+    <div class="note-group">
+      <h3 data-lang="ja">効果音について(Special Edit)</h3>
+      <h3 data-lang="en">Sound effects (Special Edit)</h3>
+      <ul class="note-list">
+        <li data-lang="ja">効果音はおまかせいただくか、ご希望の効果音を動画またはMP3ファイルで送っていただくことも可能です。効果音が不要な場合は事前にお知らせください。</li>
+        <li data-lang="en">You can let me choose the sound effects, or send the ones you'd like as a video or MP3 file. If you don't want any sound effects, please let me know in advance.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Perks -->
+  <section>
+    <p class="eyebrow" data-lang="ja">特典・その他</p>
+    <p class="eyebrow" data-lang="en">Perks & extras</p>
+    <h2 class="title" data-lang="ja">こんな特典もあります</h2>
+    <h2 class="title" data-lang="en">A few extras</h2>
+    <p class="sub">&nbsp;</p>
+
+    <div class="perk-grid">
+      <div class="perk">
+        <div class="perk-icon">🎧</div>
+        <div>
+          <div class="t" data-lang="ja">Phonkアーティストの方へ</div>
+          <div class="t" data-lang="en">Phonk artists</div>
+          <div class="d" data-lang="ja">Normal Editを1回無料でご提供します(お一人様1回限り)。</div>
+          <div class="d" data-lang="en">One free Normal Edit, limited to once per artist.</div>
+        </div>
+      </div>
+      <div class="perk">
+        <div class="perk-icon">🤝</div>
+        <div>
+          <div class="t" data-lang="ja">お友達の方へ</div>
+          <div class="t" data-lang="en">Friends</div>
+          <div class="d" data-lang="ja">Normal Editを1回無料でご提供します。2回目以降は通常料金になります。</div>
+          <div class="d" data-lang="en">One free Normal Edit. Any further requests are charged at the regular price.</div>
+        </div>
+      </div>
+      <div class="perk">
+        <div class="perk-icon">🎞️</div>
+        <div>
+          <div class="t" data-lang="ja">無料クリップ配布</div>
+          <div class="t" data-lang="en">Free clips</div>
+          <div class="d" data-lang="ja">依頼をしない方にも、Dandy's Worldのクリップを無料でお渡しできます。クリップは何度でも依頼可能です。</div>
+          <div class="d" data-lang="en">Even without requesting an edit, Dandy's World clips are available for free — and can be request multiple times.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-box">
+    <p class="msg" data-lang="ja">読んでくれてありがとう!一緒にお仕事できるのを楽しみにしています!</p>
+    <p class="msg" data-lang="en">Thank you for reading — I hope we can work together soon!</p>
+    <div class="cta-btn-row">
+      <a href="https://discord.gg/zd2TEgrTv" class="cta-btn">
+        <span data-lang="ja">Discordで依頼する</span><span data-lang="en">Request on Discord</span>
+      </a>
+      <a href="https://www.tiktok.com/@yokukichi.and.capybara?_r=1&_t=ZS-99iv04NHcZR" class="cta-btn secondary">
+        <span data-lang="ja">TikTokで依頼する</span><span data-lang="en">Request on TikTok</span>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <div>© Yokukichi.and.capybara</div>
+    <div data-lang="ja">このサイトはAIで作られたものです。</div>
+    <div data-lang="en">This website was created with AI.</div>
+  </footer>
+
+</div>
+
+<script>
+  const starField = document.getElementById('stars');
+  for(let i=0;i<60;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random()*2 + 1;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*4)+'s, '+(Math.random()*40)+'s';
+    starField.appendChild(s);
+  }
+
+  function setLang(lang){
+    document.body.classList.remove('lang-ja','lang-en');
+    document.body.classList.add('lang-'+lang);
+    document.getElementById('btn-ja').classList.toggle('active', lang==='ja');
+    document.getElementById('btn-en').classList.toggle('active', lang==='en');
+    try{ localStorage.setItem('ykc-lang', lang); }catch(e){}
+  }
+
+  (function(){
+    let saved = 'ja';
+    try{ saved = localStorage.getItem('ykc-lang') || 'ja'; }catch(e){}
+    setLang(saved);
+  })();
+</script>
+
+</body>
+</html>
